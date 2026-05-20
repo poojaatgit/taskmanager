@@ -1,5 +1,8 @@
 pipeline{
 	agent any
+	tools{
+		maven 'Maven'
+	}
 	environment{
 		DOCKER_IMAGE = "poojaatdocker/taskmanager"
         DOCKER_TAG = "${BUILD_NUMBER}"
