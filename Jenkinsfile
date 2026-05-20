@@ -2,6 +2,7 @@ pipeline{
 	agent any
 	tools{
 		maven 'Maven'
+		jdk 'JDK17'
 	}
 	environment{
 		DOCKER_IMAGE = "poojaatdocker/taskmanager"
@@ -54,6 +55,9 @@ pipeline{
         }
 	}
 	post{
+		always {
+            cleanWs()
+        }
 		success{
 			echo 'Pipeline completed successfully!'
 		}
