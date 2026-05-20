@@ -15,7 +15,6 @@ pipeline{
                 checkout scm
             }
 		}
-		stages {
         stage('Check Versions') {
             steps {
                 bat '''
@@ -28,7 +27,6 @@ pipeline{
                 '''
             }
         }
-    }
 		stage('Build Jar'){
 			steps {
                 echo 'Building JAR with Maven...'
