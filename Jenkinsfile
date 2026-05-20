@@ -1,55 +1,54 @@
-pipeline {
-    agent any
-
-    environment {
-		DOCKER_IMAGE = "poojaatdocker/taskmanager"
-    	DOCKER_TAG = "${BUILD_NUMBER}"
-    	JAVA_HOME = "C:\\Program Files\\Java\\jdk-17"
-    	MAVEN_HOME = "C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src"
+pipeline{
+	agent any
+	tools{
+		jdk 'JDK17'
+		maven 'Maven'
 	}
-
-    stages {
-
-        stage('Checkout') {
-            steps {
+	environment{
+		DOCKER_IMAGE = "poojaatdocker/taskmanager"
+        DOCKER_TAG = "${BUILD_NUMBER}"
+	}
+	stages{
+		stage('Checkout'){
+			steps {
                 echo 'Pulling code from GitHub...'
                 checkout scm
             }
-        }
-
-        stage('Build JAR') {
+		}
+		stages {
+        stage('Check Versions') {
             steps {
-                echo 'Building JAR with Maven...'
                 bat '''
-                    set JAVA_HOME=C:\\Program Files\\Java\\jdk-17
-                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src\\bin;%PATH%
-                    java -version
-                    mvn --version
-                    mvn clean package -DskipTests
+                echo JAVA_HOME=%JAVA_HOME%
+                where java
+                java -version
+
+                where mvn
+                mvn -version
                 '''
             }
         }
-
-        stage('Test') {
+    }
+		stage('Build Jar'){
+			steps {
+                echo 'Building JAR with Maven...'
+                bat 'mvn clean package -DskipTests'
+            }
+		}
+		stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                bat '''
-                    set JAVA_HOME=C:\\Program Files\\Java\\jdk-17
-                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src\\bin;%PATH%
-                    mvn test
-                '''
+                bat 'mvn test'
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
+		stage('Build Docker Image'){
+			steps {
                 echo 'Building Docker image...'
                 bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
             }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
+		}
+		stage('Push to Docker Hub'){
+			steps {
                 echo 'Pushing to Docker Hub...'
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
@@ -59,27 +58,25 @@ pipeline {
                     bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                 }
             }
-        }
-
-        stage('Deploy') {
+		}
+		stage('Run Container') {
             steps {
-                echo 'Deploying container...'
+                echo 'Deploying container locally...'
                 bat "docker stop taskmanager-app || true"
                 bat "docker rm taskmanager-app || true"
                 bat "docker run -d --name taskmanager-app -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
             }
         }
-    }
-
-    post {
-        always {
+	}
+	post{
+		always {
             cleanWs()
         }
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
+		success{
+			echo 'Pipeline completed successfully!'
+		}
+		failure{
+			echo 'Pipeline failed!'
+		}
+	}
 }
