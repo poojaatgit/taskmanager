@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "poojaatdocker/taskmanager"
-        DOCKER_TAG = "${BUILD_NUMBER}"
-        JAVA_HOME = "C:\\Program Files\\Java\\jdk-17"
-        MAVEN_HOME = "C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven"
-    }
+		DOCKER_IMAGE = "poojaatdocker/taskmanager"
+    	DOCKER_TAG = "${BUILD_NUMBER}"
+    	JAVA_HOME = "C:\\Program Files\\Java\\jdk-17"
+    	MAVEN_HOME = "C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src"
+	}
 
     stages {
 
@@ -22,7 +22,7 @@ pipeline {
                 echo 'Building JAR with Maven...'
                 bat '''
                     set JAVA_HOME=C:\\Program Files\\Java\\jdk-17
-                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\bin;%PATH%
+                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src\\bin;%PATH%
                     java -version
                     mvn --version
                     mvn clean package -DskipTests
@@ -35,7 +35,7 @@ pipeline {
                 echo 'Running unit tests...'
                 bat '''
                     set JAVA_HOME=C:\\Program Files\\Java\\jdk-17
-                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\bin;%PATH%
+                    set PATH=C:\\Program Files\\Java\\jdk-17\\bin;C:\\Program Files\\Maven\\apache-maven-3.9.15\\apache-maven\\src\\bin;%PATH%
                     mvn test
                 '''
             }
