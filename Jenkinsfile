@@ -3,6 +3,7 @@ pipeline{
 	tools{
 		jdk 'JDK17'
 		maven 'Maven'
+		dockerTool 'Docker'
 	}
 	environment{
 		DOCKER_IMAGE = "poojaatdocker/taskmanager"
@@ -60,9 +61,11 @@ pipeline{
 		stage('Run Container') {
             steps {
                 echo 'Deploying container locally...'
-                bat "docker stop taskmanager-app || true"
-                bat "docker rm taskmanager-app || true"
-                bat "docker run -d --name taskmanager-app -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                bat """
+            		docker stop taskmanager-app 2>nul
+            		docker rm taskmanager-app 2>nul
+            		docker run -d --name taskmanager-app -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}
+       			"""
             }
         }
 	}
